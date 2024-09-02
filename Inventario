@@ -1,0 +1,53 @@
+import json
+
+class Inventario:
+    def __init__(self):
+        self.productos = {}
+
+    def añadir_producto(self, producto):
+        if producto.obtener_id() not in self.productos:
+            self.productos[producto.obtener_id()] = producto
+            print(f'Producto {producto.obtener_nombre()} añadido.')
+        else:
+            print(f'El producto con ID {producto.obtener_id()} ya existe.')
+
+    def eliminar_producto(self, id_producto):
+        if id_producto in self.productos:
+            del self.productos[id_producto]
+            print(f'Producto con ID {id_producto} eliminado.')
+        else:
+            print(f'No se encontró un producto con ID {id_producto}.')
+
+    def actualizar_producto(self, id_producto, cantidad=None, precio=None):
+        if id_producto in self.productos:
+            if cantidad is not None:
+                self.productos[id_producto].establecer_cantidad(cantidad)
+            if precio is not None:
+                self.productos[id_producto].establecer_precio(precio)
+            print(f'Producto con ID {id_producto} actualizado.')
+        else:
+            print(f'No se encontró un producto con ID {id_producto}.')
+
+    def buscar_producto(self, nombre):
+        encontrados = [str(p) for p in self.productos.values() if p.obtener_nombre().lower() == nombre.lower()]
+        if encontrados:
+            return '\n'.join(encontrados)
+        else:
+            return 'Producto no encontrado.'
+
+    def mostrar_todos(self):
+        return '\n'.join([str(p) for p in self.productos.values()]) if self.productos else 'Inventario vacío.'
+
+    def guardar_inventario(self, archivo):
+        with open(archivo, 'w') as f:
+            json.dump({id: vars(p) for id, p in self.productos.items()}, f)
+        print(f'Inventario guardado en {archivo}.')
+
+    def cargar_inventario(self, archivo):
+        try:
+            with open(archivo, 'r') as f:
+                productos = json.load(f)
+                self.productos = {id: Producto(**data) for id, data in productos.items()}
+            print(f'Inventario cargado desde {archivo}.')
+        except FileNotFoundError:
+            print(f'Archivo {archivo} no encontrado.')
